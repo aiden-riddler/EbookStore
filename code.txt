@@ -1,0 +1,275 @@
+from ShoppingCart import ShoppingCart
+
+
+class Customer:
+    """ class for customer """
+    def __init__(self, name, contact_info, is_loyalty_member=False):
+        self._name = name
+        self._contact_info = contact_info
+        self._is_loyalty_member = is_loyalty_member
+        self._shopping_cart = ShoppingCart()
+
+    # get customer's shopping cart
+    def get_cart(self):
+        return self._shopping_cart
+
+    # check customer's loyalty
+    def is_loyalty_member(self):
+        return self._is_loyalty_member
+
+    # get customer details
+    def __str__(self):
+        return f"Customer: {self._name}, Contact: {self._contact_info}, Loyalty Member: {self._is_loyalty_member}"
+
+
+
+class EBook:
+    """ class for Ebook """
+
+    def __init__(self, title, author, publication_date, genre, price):
+        self._title = title
+        self._author = author
+        self._publication_date = publication_date
+        self._genre = genre
+        self._price = price
+
+    # get price of Ebook
+    def get_price(self):
+        return self._price
+
+    # get Ebook details
+    def __str__(self):
+        return f"{self._title} by {self._author} - {self._genre} - ${self._price}"
+
+
+class EBookCatalog:
+    """ class for EBookCatalog """
+    def __init__(self):
+        self.ebooks = []
+
+    # add ebook to catalog
+    def add_ebook(self, ebook):
+        self.ebooks.append(ebook)
+
+    # remove ebook from catalog
+    def remove_ebook(self, title):
+        self.ebooks = [ebook for ebook in self.ebooks if ebook._title != title]
+
+    # print ebooks in catalog
+    def list_ebooks(self):
+        for ebook in self.ebooks:
+            print(ebook)
+
+    # find an ebook on catalog with title
+    def find_ebook(self, title):
+        for ebook in self.ebooks:
+            if ebook._title == title:
+                return ebook
+        return None
+
+
+from datetime import datetime
+
+
+class Invoice:
+    """ class for invoice """
+    VAT_RATE = 0.08
+
+    def __init__(self, order):
+        self.order_details = order
+        self.invoice_date = datetime.now()
+        self.total_with_vat = self.calculate_total_with_vat()
+
+    # get total cosst with VAT
+    def calculate_total_with_vat(self):
+        total = self.order_details.get_final_total()
+        return total + (total * self.VAT_RATE)
+
+    # get invoice details
+    def __str__(self):
+        return f"Invoice Date: {self.invoice_date}\n{self.order_details}\nTotal with VAT: ${self.total_with_vat:.2f}"
+
+
+
+from datetime import datetime
+
+class Order:
+    """ class for order """
+    def __init__(self, customer, cart):
+        self.order_date = datetime.now()
+        self.order_items = cart.items.copy()
+        self.total_price = cart.get_cart_total()
+        self.customer = customer
+        self.discount = self.calculate_discount()
+
+    # calculate customer discount based on loyalty
+    def calculate_discount(self):
+        discount = 0
+        if self.customer.is_loyalty_member():
+            discount += 0.10 * self.total_price  # 10% for loyalty members
+        if len(self.order_items) >= 5:
+            discount += 0.20 * self.total_price  # 20% for bulk orders
+        return discount
+
+    # get final total price
+    def get_final_total(self):
+        return self.total_price - self.discount
+
+    # get order details
+    def __str__(self):
+        items = "\n".join([f"{ebook} x {qty}" for ebook, qty in self.order_items.items()])
+        return f"Order Date: {self.order_date}\nItems:\n{items}\nDiscount: ${self.discount}\nTotal: ${self.get_final_total()}"
+
+
+class ShoppingCart:
+    """ class for shopping cart"""
+    def __init__(self):
+        self.items = {}
+
+    # add ebook to cart
+    def add_to_cart(self, ebook, quantity=1):
+        if ebook in self.items:
+            self.items[ebook] += quantity
+        else:
+            self.items[ebook] = quantity
+
+    # remove ebook from cart
+    def remove_from_cart(self, ebook):
+        if ebook in self.items:
+            del self.items[ebook]
+
+    # get total price of items in cart
+    def get_cart_total(self):
+        return sum(ebook.get_price() * qty for ebook, qty in self.items.items())
+
+    # print shopping cart
+    def list_cart_items(self):
+        for ebook, qty in self.items.items():
+            print(f"{ebook} x {qty}")
+
+    # remove all items from cart
+    def clear_cart(self):
+        self.items = {}
+
+
+from EBook import EBook
+from EBookCatalog import EBookCatalog
+from Customer import Customer
+from Order import Order
+from Invoice import Invoice
+
+
+# Initialize catalog and test adding/removing e-books
+def test_catalog_management():
+    print("Testing Catalog Management")
+    catalog = EBookCatalog()
+
+    # Add e-books to catalog
+    ebook1 = EBook("Python 101", "John Doe", "2022", "Programming", 20.00)
+    ebook2 = EBook("AI Essentials", "Jane Smith", "2023", "AI", 35.00)
+    ebook3 = EBook("Data Science Basics", "Alice Brown", "2021", "Data Science", 50.00)
+    catalog.add_ebook(ebook1)
+    catalog.add_ebook(ebook2)
+    catalog.add_ebook(ebook3)
+
+    # List e-books
+    print("\nCatalog E-Books List:")
+    catalog.list_ebooks()
+
+    # Remove an e-book
+    catalog.remove_ebook("AI Essentials")
+    print("\nCatalog After Removing 'AI Essentials':")
+    catalog.list_ebooks()
+    print("Catalog Management Test Passed\n")
+
+
+# Test customer creation and management of shopping cart
+def test_customer_cart_operations():
+    print("Testing Customer and Shopping Cart Operations")
+
+    # Create customers
+    customer1 = Customer("Alice", "alice@example.com", is_loyalty_member=True)
+    customer2 = Customer("Bob", "bob@example.com", is_loyalty_member=False)
+
+    # Get carts
+    cart1 = customer1.get_cart()
+    cart2 = customer2.get_cart()
+
+    # Add items to customer1's cart
+    ebook1 = EBook("Python 101", "John Doe", "2022", "Programming", 20.00)
+    ebook2 = EBook("Data Science Basics", "Alice Brown", "2021", "Data Science", 50.00)
+    cart1.add_to_cart(ebook1, 3)  # Adding 3 copies of Python 101
+    cart1.add_to_cart(ebook2, 1)  # Adding 1 copy of Data Science Basics
+
+    # Add items to customer2's cart
+    cart2.add_to_cart(ebook1, 1)  # Adding 1 copy of Python 101
+
+    # List cart items
+    print("\nCustomer 1's Cart Items:")
+    cart1.list_cart_items()
+    print("\nCustomer 2's Cart Items:")
+    cart2.list_cart_items()
+
+    # Remove item from customer1's cart
+    cart1.remove_from_cart(ebook2)
+    print("\nCustomer 1's Cart After Removing 'Data Science Basics':")
+    cart1.list_cart_items()
+    print("Customer and Cart Operations Test Passed\n")
+
+
+# Test order creation, discount application, and final total calculation
+def test_order_processing():
+    print("Testing Order Processing and Discounts")
+
+    # Set up customer with loyalty membership and shopping cart
+    customer = Customer("Alice", "alice@example.com", is_loyalty_member=True)
+    cart = customer.get_cart()
+
+    # Add items to cart to test bulk discount
+    ebook1 = EBook("Python 101", "John Doe", "2022", "Programming", 20.00)
+    ebook2 = EBook("AI Essentials", "Jane Smith", "2023", "AI", 35.00)
+    ebook3 = EBook("Data Science Basics", "Alice Brown", "2021", "Data Science", 50.00)
+
+    cart.add_to_cart(ebook1, 5)  # Adding 5 copies to qualify for bulk discount
+    cart.add_to_cart(ebook2, 1)  # Additional item to check total calculation
+
+    # Create order from cart
+    order = Order(customer, cart)
+
+    # Check discount applied
+    print("\nOrder Summary with Discounts Applied:")
+    print(order)
+    print("Order Processing and Discounts Test Passed\n")
+
+
+# Test invoice generation with VAT calculation
+def test_invoice_generation():
+    print("Testing Invoice Generation with VAT Calculation")
+
+    # Set up customer and create cart
+    customer = Customer("Alice", "alice@example.com", is_loyalty_member=True)
+    cart = customer.get_cart()
+
+    # Add items to cart
+    ebook1 = EBook("Python 101", "John Doe", "2022", "Programming", 20.00)
+    ebook2 = EBook("Data Science Basics", "Alice Brown", "2021", "Data Science", 50.00)
+    cart.add_to_cart(ebook1, 2)  # Adding 2 copies of Python 101
+    cart.add_to_cart(ebook2, 3)  # Adding 3 copies of Data Science Basics
+
+    # Create order from cart and generate invoice
+    order = Order(customer, cart)
+    invoice = Invoice(order)
+
+    # Display invoice
+    print("\nInvoice Summary with VAT Applied:")
+    print(invoice)
+    print("Invoice Generation Test Passed\n")
+
+
+# Execute tests
+print("Running All Tests\n")
+test_catalog_management()
+test_customer_cart_operations()
+test_order_processing()
+test_invoice_generation()
+print("All Tests Completed Successfully")
