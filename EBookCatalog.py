@@ -1,24 +1,35 @@
 class EBookCatalog:
-    """ class for EBookCatalog """
+    """Class representing a catalog of eBooks."""
+
     def __init__(self):
+        """Initialize the eBook catalog."""
         self.ebooks = []
 
-    # add ebook to catalog
+    # Getter and Setter for eBook catalog
+    def get_ebooks(self):
+        """Get the list of eBooks in the catalog."""
+        return self.ebooks
+
+    def set_ebooks(self, ebooks):
+        """Set the list of eBooks in the catalog."""
+        self.ebooks = ebooks
+
     def add_ebook(self, ebook):
+        """Add an eBook to the catalog."""
         self.ebooks.append(ebook)
 
-    # remove ebook from catalog
     def remove_ebook(self, title):
-        self.ebooks = [ebook for ebook in self.ebooks if ebook._title != title]
+        """Remove an eBook from the catalog by its title."""
+        self.ebooks = [ebook for ebook in self.ebooks if ebook.get_title() != title]
 
-    # print ebooks in catalog
     def list_ebooks(self):
+        """Print the list of eBooks in the catalog."""
         for ebook in self.ebooks:
             print(ebook)
 
-    # find an ebook on catalog with title
     def find_ebook(self, title):
+        """Find an eBook in the catalog by its title."""
         for ebook in self.ebooks:
-            if ebook._title == title:
+            if ebook.get_title() == title:
                 return ebook
         return None
